@@ -39,6 +39,8 @@ dependencies:
   google_generative_ai: ^0.4.3
   jumping_dot: ^0.0.7
   brain_fusion: ^0.1.1
+  provider: ^6.1.2
+  flutter_riverpod: ^2.5.1
 
 dev_dependencies:
   flutter_test:

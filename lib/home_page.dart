@@ -1,9 +1,11 @@
 import 'dart:typed_data';
 
+import 'package:content_creator/home_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:jumping_dot/jumping_dot.dart';
 import 'package:brain_fusion/brain_fusion.dart';
+import 'package:provider/provider.dart';
 
 const apiKey = "AIzaSyBatUW7pEBpkEEa5Kqgw5GZUgzg0s01lcU";
 
@@ -73,7 +75,15 @@ class _HomePageState extends State<HomePage> {
                   animationDuration: Duration(milliseconds: 200),
                 ),
               Container(
-                child: displayedImage,
+                alignment: Alignment.center,
+                height: 320,
+                width: 320,
+                decoration: BoxDecoration(
+                    border: Border.all(color: Colors.white, width: 2),
+                    borderRadius: BorderRadius.circular(
+                      12.0,
+                    )),
+                // child: Image.memory(fWatch.imageData!),
               )
             ],
           ),
@@ -127,12 +137,20 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         displayedResponse = response;
       });
-      final picture = _getPicture(response);
+      final imagePrompt = "$response make an image based on this recipe";
+      _processPromptToImage(imagePrompt);
+      await Future.delayed(Duration(seconds: 20));
       setState(() {
-        displayedImage = picture;
+
+        // displayedImage = picture;
         waitingForResponse = false;
       });
     }
+  }
+
+  void _processPromptToImage(String imagePrompt) {
+    final homeProvider = Provider.of<HomeProvider>(context);
+    homeProvider.textToImage(imagePrompt, context);
   }
 
   Future<String> _getResponse(String text, double temperature) async {
@@ -150,35 +168,5 @@ class _HomePageState extends State<HomePage> {
     //   waitingForResponse = false;
     // });
     return response.text!;
-  }
-
-  Future<Uint8List> generate(String query) async {
-    // Call the runAI method with the required parameters
-    Uint8List image = await ai.runAI(query, AIStyle.anime, Resolution.r1x1);
-    return image;
-  }
-
-  Widget _getPicture(String response) {
-    // final query = "$response. Make the image of this dish!";
-    final query = "Goku's power-up noodle, with chopped vegetable, chicken, tofu, make it to looks so delicious wth the sauce. Make the image of this dish!";
-    return FutureBuilder<Uint8List>(
-      // Call the generate() function to get the image data
-      future: generate(query),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          // While waiting for the image data, display a loading indicator
-          return const CircularProgressIndicator();
-        } else if (snapshot.hasError) {
-          // If an error occurred while getting the image data, display an error
-          return Text('Error: ${snapshot.error}');
-        } else if (snapshot.hasData) {
-          // If the image data is available, display the image using Image.memory()
-          return Image.memory(snapshot.data!);
-        } else {
-          // If no data is available, display a placeholder or an empty container
-          return Container();
-        }
-      },
-    );
   }
 }
